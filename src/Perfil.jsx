@@ -2,13 +2,12 @@ import { useState } from 'react';
 import axios from 'axios';
 import './Perfil.css';
 
-function Perfil({ usuario, onCerrarSesion }) {
+function Perfil({ usuario, onCerrarSesion, onVolver }) {
   const [imagenPerfil, setImagenPerfil] = useState(
     usuario.fotoUrl || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
   );
   const [subiendo, setSubiendo] = useState(false);
 
-  // Datos reales para mostrar
   const correoReal = 'hermeswsolorzano@gmail.com';
   const telefonoReal = '3042826762';
 
@@ -107,6 +106,10 @@ function Perfil({ usuario, onCerrarSesion }) {
             <span className="info-valor">12 envíos realizados</span>
           </div>
         </div>
+
+        <button className="btn-volver" onClick={onVolver} style={{ marginBottom: '10px' }}>
+          ← Volver al Inicio
+        </button>
 
         <button className="btn-volver" onClick={onCerrarSesion}>
           Cerrar Sesión

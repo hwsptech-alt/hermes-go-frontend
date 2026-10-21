@@ -5,6 +5,7 @@ import Registro from './Registro';
 import Home from './Home';
 import HomeTransportador from './HomeTransportador';
 import Perfil from './Perfil';
+import PerfilTransportador from './PerfilTransportador';
 
 function App() {
   const [correo, setCorreo] = useState('');
@@ -38,9 +39,21 @@ function App() {
     }
   };
 
-  // Pantalla de Perfil
+  // Pantalla de Perfil (según el rol)
   if (mostrarPerfil) {
-    return <Perfil usuario={usuario} onCerrarSesion={() => { setMostrarPerfil(false); setLogueado(false); }} />;
+    if (usuario.rol === 'TRANSPORTADOR') {
+      return <PerfilTransportador 
+        usuario={usuario} 
+        onCerrarSesion={() => { setMostrarPerfil(false); setLogueado(false); }} 
+        onVolver={() => setMostrarPerfil(false)} 
+      />;
+    } else {
+      return <Perfil 
+        usuario={usuario} 
+        onCerrarSesion={() => { setMostrarPerfil(false); setLogueado(false); }} 
+        onVolver={() => setMostrarPerfil(false)} 
+      />;
+    }
   }
 
   // Pantalla después del login (según el rol)
