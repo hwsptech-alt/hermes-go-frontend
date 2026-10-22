@@ -6,6 +6,7 @@ import Home from './Home';
 import HomeTransportador from './HomeTransportador';
 import Perfil from './Perfil';
 import PerfilTransportador from './PerfilTransportador';
+import PublicarCarga from './PublicarCarga';
 
 function App() {
   const [correo, setCorreo] = useState('');
@@ -15,6 +16,7 @@ function App() {
   const [usuario, setUsuario] = useState(null);
   const [mostrarRegistro, setMostrarRegistro] = useState(false);
   const [mostrarPerfil, setMostrarPerfil] = useState(false);
+  const [mostrarPublicarCarga, setMostrarPublicarCarga] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -56,12 +58,29 @@ function App() {
     }
   }
 
+  // Pantalla de Publicar Carga (solo para Clientes)
+  if (mostrarPublicarCarga) {
+    return <PublicarCarga 
+      usuario={usuario} 
+      onVolver={() => setMostrarPublicarCarga(false)} 
+    />;
+  }
+
   // Pantalla después del login (según el rol)
   if (logueado) {
     if (usuario.rol === 'TRANSPORTADOR') {
-      return <HomeTransportador usuario={usuario} onCerrarSesion={() => setLogueado(false)} onVerPerfil={() => setMostrarPerfil(true)} />;
+      return <HomeTransportador 
+        usuario={usuario} 
+        onCerrarSesion={() => setLogueado(false)} 
+        onVerPerfil={() => setMostrarPerfil(true)} 
+      />;
     } else {
-      return <Home usuario={usuario} onCerrarSesion={() => setLogueado(false)} onVerPerfil={() => setMostrarPerfil(true)} />;
+      return <Home 
+        usuario={usuario} 
+        onCerrarSesion={() => setLogueado(false)} 
+        onVerPerfil={() => setMostrarPerfil(true)} 
+        onPublicarCarga={() => setMostrarPublicarCarga(true)}
+      />;
     }
   }
 
