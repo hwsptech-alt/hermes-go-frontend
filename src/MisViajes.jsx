@@ -8,12 +8,18 @@ function MisViajes({ usuario, onVolver, onVerMapa, onLlegadaDestino }) {
 
   const cargarViajes = async () => {
     try {
-      // Traemos las cargas del transportador (filtramos en frontend por su ID)
-      const todas = await axios.get('http://localhost:8080/api/cargas/historial/1'); 
-      const misCargas = todas.data.filter(c => c.transportador && c.transportador.id === usuario.id);
+      // Traemos TODAS las cargas para asegurarnos de que aparezcan las de Juan
+      const response = await axios.get('http://localhost:8080/api/cargas/todas'); 
+      
+      // Filtramos comparando el ID del transportador de forma segura
+      const misCargas = response.data.filter(c => 
+        c.transportador && 
+        (c.transportador.id === usuario.id || c.transportador.id === Number(usuario.id))
+      );
+      
       setCargas(misCargas);
     } catch (error) {
-      console.error(error);
+      console.error("Error al cargar viajes:", error);
     } finally {
       setCargando(false);
     }
@@ -28,7 +34,7 @@ function MisViajes({ usuario, onVolver, onVerMapa, onLlegadaDestino }) {
       <div className="form-card">
         <h2>Mis Viajes</h2>
         
-        {cargando && <p>Cargando viajes...</p>}
+        {cargando && <p style={{ textAlign: 'center' }}>Cargando viajes...</p>}
         {!cargando && cargas.length === 0 && (
           <p style={{ textAlign: 'center', color: '#666' }}>No tienes viajes asignados aún.</p>
         )}
@@ -37,7 +43,7 @@ function MisViajes({ usuario, onVolver, onVerMapa, onLlegadaDestino }) {
           {cargas.map((carga) => (
             <div key={carga.id} className="carga-card" style={{ textAlign: 'center' }}>
               <strong>{carga.origen} ➔ {carga.destino}</strong>
-              <p style={{ color: '#FF8C00', fontWeight: 'bold' }}>${carga.precioFinal?.toLocaleString()} COP</p>
+              <p style={{ color: '#FF8C00', fontWeight: 'bold' }}>${carga.precioFinal?.toLocaleString() || carga.precioBase?.toLocaleString()} COP</p>
               <p style={{ fontSize: '12px', fontWeight: 'bold', color: carga.estado === 'ENTREGADA' ? 'green' : 'orange' }}>
                 Estado: {carga.estado}
               </p>

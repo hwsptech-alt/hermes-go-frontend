@@ -1,6 +1,6 @@
 import './App.css';
 
-function HomeTransportador({ usuario, onCerrarSesion, onVerPerfil, onVerCargas }) {
+function HomeTransportador({ usuario, onCerrarSesion, onVerPerfil, onVerCargas, onVerMisViajes }) {
   return (
     <div className="container">
       <div className="home-header">
@@ -13,18 +13,22 @@ function HomeTransportador({ usuario, onCerrarSesion, onVerPerfil, onVerCargas }
           <span className="menu-icon">📋</span>
           <span>Ver Cargas Disponibles</span>
         </button>
-        <button className="menu-card">
+        
+        <button className="menu-card" onClick={onVerMisViajes}>
           <span className="menu-icon">🚛</span>
           <span>Mis Viajes</span>
         </button>
-        <button className="menu-card">
+
+        <button className="menu-card" onClick={() => alert('Módulo de Ganancias: Aquí verás el total de tus fletes cobrados.')}>
           <span className="menu-icon">💰</span>
           <span>Mis Ganancias</span>
         </button>
-        <button className="menu-card">
+        
+        <button className="menu-card" onClick={() => alert('Módulo de Calificaciones: Aquí verás las estrellas que te dan los clientes.')}>
           <span className="menu-icon">⭐</span>
           <span>Mis Calificaciones</span>
         </button>
+        
         <button className="menu-card" onClick={onVerPerfil}>
           <span className="menu-icon">👤</span>
           <span>Mi Perfil</span>

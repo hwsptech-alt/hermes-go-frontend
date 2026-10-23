@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
-function Historial({ usuario, onVolver, onIrAPagar, onVerMapa }) {
+function Historial({ usuario, onVolver, onIrAPagar, onVerMapa, onCalificar }) {
   const [cargas, setCargas] = useState([]);
   const [cargando, setCargando] = useState(true);
 
@@ -65,14 +65,25 @@ function Historial({ usuario, onVolver, onIrAPagar, onVerMapa }) {
                 </button>
               )}
 
-              {/* Botón para ver el mapa (siempre visible) */}
+              {/* Botón para ver el mapa */}
               <button 
                 className="btn-volver" 
-                style={{ padding: '6px', fontSize: '12px' }}
+                style={{ padding: '6px', fontSize: '12px', marginBottom: '5px' }}
                 onClick={() => onVerMapa(carga)}
               >
                 📍 Ver Seguimiento
               </button>
+
+              {/* Botón para calificar */}
+              {carga.estado === 'ENTREGADA' && !carga.calificacion && (
+                <button 
+                  className="btn-login" 
+                  style={{ padding: '8px', fontSize: '13px', backgroundColor: '#FFD700', color: '#000' }}
+                  onClick={() => onCalificar(carga)}
+                >
+                  ⭐ Calificar Servicio
+                </button>
+              )}
             </div>
           ))}
         </div>

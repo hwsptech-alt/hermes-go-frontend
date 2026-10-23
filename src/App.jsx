@@ -14,7 +14,8 @@ import Historial from './Historial';
 import MapaSeguimiento from './MapaSeguimiento';
 import ActaEntrega from './ActaEntrega';
 import MisViajes from './MisViajes';
-import LlegadaDestino from './LlegadaDestino'; // <-- NUEVO IMPORT
+import LlegadaDestino from './LlegadaDestino';
+import Calificacion from './Calificacion';
 
 function App() {
   const [correo, setCorreo] = useState('');
@@ -45,10 +46,12 @@ function App() {
   const [mostrarMisViajes, setMostrarMisViajes] = useState(false);
   const [mostrarActa, setMostrarActa] = useState(false);
   const [cargaParaActa, setCargaParaActa] = useState(null);
-  
-  // NUEVOS Estados para la Llegada al Destino
   const [mostrarLlegada, setMostrarLlegada] = useState(false);
   const [cargaLlegada, setCargaLlegada] = useState(null);
+
+  // Estados para Calificación
+  const [mostrarCalificacion, setMostrarCalificacion] = useState(false);
+  const [cargaParaCalificar, setCargaParaCalificar] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -67,145 +70,101 @@ function App() {
     }
   };
 
-  // 1. Pantalla: Confirmar Llegada al Destino (Transportador)
+  // 1. Calificación
+  if (mostrarCalificacion && cargaParaCalificar) {
+    return <Calificacion 
+      carga={cargaParaCalificar} 
+      onVolver={() => { setMostrarCalificacion(false); setCargaParaCalificar(null); setMostrarHistorial(true); }} 
+    />;
+  }
+
+  // 2. Llegada al Destino
   if (mostrarLlegada && cargaLlegada) {
     return <LlegadaDestino 
       carga={cargaLlegada} 
-      onFinalizar={() => { 
-        setMostrarLlegada(false); 
-        setCargaLlegada(null); 
-        setMostrarMisViajes(true); // Vuelve a Mis Viajes
-      }} 
+      onFinalizar={() => { setMostrarLlegada(false); setCargaLlegada(null); setMostrarMisViajes(true); }} 
       onVolver={() => setMostrarLlegada(false)} 
     />;
   }
 
-  // 2. Pantalla: Acta de Entrega (Transportador)
-  if (mostrarActa && cargaParaActa) {
-    return <ActaEntrega 
-      carga={cargaParaActa} 
-      onFinalizar={() => { setMostrarActa(false); setCargaParaActa(null); }} 
-      onVolver={() => setMostrarActa(false)} 
-    />;
-  }
-
-  // 3. Pantalla: Mapa de Seguimiento (Ambos)
+  // 3. Mapa de Seguimiento
   if (mostrarMapa && cargaParaMapa) {
-    return <MapaSeguimiento 
-      carga={cargaParaMapa} 
-      onVolver={() => setMostrarMapa(false)} 
-    />;
+    return <MapaSeguimiento carga={cargaParaMapa} onVolver={() => setMostrarMapa(false)} />;
   }
 
-  // 4. Pantalla: Mis Viajes (Transportador)
+  // 4. Mis Viajes
   if (mostrarMisViajes) {
     return <MisViajes 
       usuario={usuario} 
       onVolver={() => setMostrarMisViajes(false)} 
       onVerMapa={(carga) => { setCargaParaMapa(carga); setMostrarMapa(true); setMostrarMisViajes(false); }}
-      onLlegadaDestino={(carga) => {
-        setCargaLlegada(carga);
-        setMostrarLlegada(true);
-        setMostrarMisViajes(false);
-      }}
+      onLlegadaDestino={(carga) => { setCargaLlegada(carga); setMostrarLlegada(true); setMostrarMisViajes(false); }}
     />;
   }
 
-  // 5. Pantalla: Historial (Cliente)
+  // 5. Historial (Cliente)
   if (mostrarHistorial) {
     return <Historial 
       usuario={usuario} 
       onVolver={() => setMostrarHistorial(false)} 
       onIrAPagar={(carga) => { setCargaParaPagar(carga); setMostrarHistorial(false); setMostrarPago(true); }} 
       onVerMapa={(carga) => { setCargaParaMapa(carga); setMostrarHistorial(false); setMostrarMapa(true); }}
+      onCalificar={(carga) => { setCargaParaCalificar(carga); setMostrarCalificacion(true); setMostrarHistorial(false); }}
     />;
   }
 
-  // 6. Pantalla: Pago (Cliente)
+  // 6. Pago
   if (mostrarPago && cargaParaPagar) {
-    return <Pago 
-      carga={cargaParaPagar} 
-      usuario={usuario} 
-      onPagar={() => { setMostrarPago(false); setMostrarPublicarCarga(false); setCargaParaPagar(null); }} 
-      onVolver={() => setMostrarPago(false)} 
-    />;
+    return <Pago carga={cargaParaPagar} usuario={usuario} onPagar={() => { setMostrarPago(false); setMostrarPublicarCarga(false); setCargaParaPagar(null); }} onVolver={() => setMostrarPago(false)} />;
   }
 
-  // 7. Pantalla: Ver Cargas (Transportador)
+  // 7. Ver Cargas (Transportador)
   if (mostrarVerCargas) {
-    return <VerCargas 
-      usuario={usuario} 
-      onVolver={() => setMostrarVerCargas(false)} 
-      onSeleccionarCarga={(carga) => { setCargaSeleccionadaTransportador(carga); setMostrarVerCargas(false); setMostrarConfirmarServicio(true); }} 
-    />;
+    return <VerCargas usuario={usuario} onVolver={() => setMostrarVerCargas(false)} onSeleccionarCarga={(carga) => { setCargaSeleccionadaTransportador(carga); setMostrarVerCargas(false); setMostrarConfirmarServicio(true); }} />;
   }
 
-  // 8. Pantalla: Confirmar Servicio
+  // 8. Confirmar Servicio
   if (mostrarConfirmarServicio && (cargaPublicada || cargaSeleccionadaTransportador)) {
     const cargaAMostrar = cargaSeleccionadaTransportador || cargaPublicada;
     const transportadorAMostrar = cargaSeleccionadaTransportador ? usuario : (cargaAMostrar.transportador || { nombreCompleto: 'Pendiente', tipoVehiculo: 'N/A', placa: 'N/A' });
 
     return <ConfirmarServicio 
-      carga={cargaAMostrar} 
-      transportador={transportadorAMostrar} 
-      usuario={usuario}
+      carga={cargaAMostrar} transportador={transportadorAMostrar} usuario={usuario}
       onConfirmar={() => { 
         setMostrarConfirmarServicio(false); 
-        if (cargaSeleccionadaTransportador) {
-          setCargaSeleccionadaTransportador(null);
-          setMostrarPublicarCarga(false); 
-          alert('¡Has aceptado la carga exitosamente!');
-        } else {
-          setCargaPublicada(null);
-          setMostrarPublicarCarga(false); 
-          alert('¡Carga publicada! Un transportador la aceptará pronto. Podrás pagarla desde tu Historial.');
-        }
+        if (cargaSeleccionadaTransportador) { setCargaSeleccionadaTransportador(null); setMostrarPublicarCarga(false); alert('¡Has aceptado la carga exitosamente!'); } 
+        else { setCargaPublicada(null); setMostrarPublicarCarga(false); alert('¡Carga publicada! Un transportador la aceptará pronto. Podrás pagarla desde tu Historial.'); }
       }} 
       onVolver={() => { setMostrarConfirmarServicio(false); if (cargaSeleccionadaTransportador) setMostrarVerCargas(true); }} 
     />;
   }
 
-  // 9. Pantalla: Perfil (Según Rol)
+  // 9. Perfil
   if (mostrarPerfil) {
-    if (usuario.rol === 'TRANSPORTADOR') {
-      return <PerfilTransportador usuario={usuario} onCerrarSesion={() => { setMostrarPerfil(false); setLogueado(false); }} onVolver={() => setMostrarPerfil(false)} />;
-    } else {
-      return <Perfil usuario={usuario} onCerrarSesion={() => { setMostrarPerfil(false); setLogueado(false); }} onVolver={() => setMostrarPerfil(false)} />;
-    }
+    if (usuario.rol === 'TRANSPORTADOR') return <PerfilTransportador usuario={usuario} onCerrarSesion={() => { setMostrarPerfil(false); setLogueado(false); }} onVolver={() => setMostrarPerfil(false)} />;
+    else return <Perfil usuario={usuario} onCerrarSesion={() => { setMostrarPerfil(false); setLogueado(false); }} onVolver={() => setMostrarPerfil(false)} />;
   }
 
-  // 10. Pantalla: Publicar Carga (Cliente)
+  // 10. Publicar Carga
   if (mostrarPublicarCarga) {
     return <PublicarCarga usuario={usuario} onVolver={() => setMostrarPublicarCarga(false)} onConfirmarServicio={(carga) => { setCargaPublicada(carga); setMostrarConfirmarServicio(true); }} />;
   }
 
-  // 11. Pantalla: Home (Cliente o Transportador)
+  // 11. Home
   if (logueado) {
     if (usuario.rol === 'TRANSPORTADOR') {
-      return <HomeTransportador 
-        usuario={usuario} 
-        onCerrarSesion={() => setLogueado(false)} 
-        onVerPerfil={() => setMostrarPerfil(true)} 
-        onVerCargas={() => setMostrarVerCargas(true)} 
-        onVerMisViajes={() => setMostrarMisViajes(true)} 
-      />;
+      return <HomeTransportador usuario={usuario} onCerrarSesion={() => setLogueado(false)} onVerPerfil={() => setMostrarPerfil(true)} onVerCargas={() => setMostrarVerCargas(true)} onVerMisViajes={() => setMostrarMisViajes(true)} />;
     } else {
-      return <Home 
-        usuario={usuario} 
-        onCerrarSesion={() => setLogueado(false)} 
-        onVerPerfil={() => setMostrarPerfil(true)} 
-        onPublicarCarga={() => setMostrarPublicarCarga(true)} 
-        onVerHistorial={() => setMostrarHistorial(true)} 
-      />;
+      return <Home usuario={usuario} onCerrarSesion={() => setLogueado(false)} onVerPerfil={() => setMostrarPerfil(true)} onPublicarCarga={() => setMostrarPublicarCarga(true)} onVerHistorial={() => setMostrarHistorial(true)} />;
     }
   }
 
-  // 12. Pantalla: Registro
+  // 12. Registro
   if (mostrarRegistro) {
     return <Registro onVolverAlLogin={() => setMostrarRegistro(false)} />;
   }
 
-  // 13. Pantalla: Login
+  // 13. Login
   return (
     <div className="container">
       <div className="login-card">
