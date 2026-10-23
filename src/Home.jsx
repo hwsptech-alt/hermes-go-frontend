@@ -1,6 +1,6 @@
 import './App.css';
 
-function Home({ usuario, onCerrarSesion, onVerPerfil, onPublicarCarga }) {
+function Home({ usuario, onCerrarSesion, onVerPerfil, onPublicarCarga, onVerHistorial }) {
   return (
     <div className="container">
       <div className="home-header">
@@ -21,7 +21,7 @@ function Home({ usuario, onCerrarSesion, onVerPerfil, onPublicarCarga }) {
           <span className="menu-icon">📍</span>
           <span>Seguimiento</span>
         </button>
-        <button className="menu-card">
+        <button className="menu-card" onClick={onVerHistorial}>
           <span className="menu-icon">📜</span>
           <span>Historial</span>
         </button>

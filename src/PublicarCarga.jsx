@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
-function PublicarCarga({ usuario, onVolver }) {
+function PublicarCarga({ usuario, onVolver, onConfirmarServicio }) {
   const [origen, setOrigen] = useState('');
   const [destino, setDestino] = useState('');
   const [fechaHora, setFechaHora] = useState('');
@@ -12,23 +12,65 @@ function PublicarCarga({ usuario, onVolver }) {
   const [esPerecedera, setEsPerecedera] = useState(false);
   const [esCompartida, setEsCompartida] = useState(false);
   const [descripcion, setDescripcion] = useState('');
-  const [precioBase, setPrecioBase] = useState('');
   
+  const [distancia, setDistancia] = useState(0);
+
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
   const [cargando, setCargando] = useState(false);
+
+  // Este useEffect se ejecuta cada vez que cambia el origen o el destino
+  useEffect(() => {
+    if (!origen || !destino) {
+      setDistancia(0);
+      return;
+    }
+
+    const ruta = `${origen.toLowerCase().trim()}-${destino.toLowerCase().trim()}`;
+
+    // Simulador de distancias
+    if (ruta.includes('bogota') && ruta.includes('medellin')) setDistancia(440);
+    else if (ruta.includes('bogota') && ruta.includes('cali')) setDistancia(460);
+    else if (ruta.includes('bogota') && ruta.includes('barranquilla')) setDistancia(1000);
+    else if (ruta.includes('bogota') && ruta.includes('cartagena')) setDistancia(1050);
+    else if (ruta.includes('medellin') && ruta.includes('cali')) setDistancia(420);
+    else if (ruta.includes('medellin') && ruta.includes('cartagena')) setDistancia(640);
+    else if (ruta.includes('cali') && ruta.includes('pasto')) setDistancia(260);
+    else {
+      // Si no reconoce la ruta, calcula una distancia base
+      setDistancia(150); 
+    }
+  }, [origen, destino]);
+
+  // Función para calcular el precio automáticamente con tarifas realistas
+  const calcularPrecioBase = () => {
+    const pesoNum = parseFloat(peso) || 0;
+    const volumenNum = parseFloat(volumen) || 0;
+
+    if (pesoNum === 0 && volumenNum === 0) return 0;
+
+    // Tarifas ajustadas a la realidad colombiana
+    const tarifaPorKm = 1500;    
+    const tarifaPorKg = 200;     
+    const tarifaPorVolumen = 5000; 
+
+    return (distancia * tarifaPorKm) + (pesoNum * tarifaPorKg) + (volumenNum * tarifaPorVolumen);
+  };
+
+  const precioCalculado = calcularPrecioBase();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMensaje('');
     setError('');
 
-    // Validaciones lógicas
+    if (!origen || !destino) return setError('Debes ingresar origen y destino.');
     if (parseFloat(peso) <= 0) return setError('El peso debe ser mayor a 0.');
     if (parseFloat(volumen) <= 0) return setError('El volumen debe ser mayor a 0.');
-    if (parseFloat(precioBase) <= 0) return setError('El precio base debe ser mayor a 0.');
     if (!fechaHora) return setError('Debes seleccionar una fecha y hora.');
+    if (new Date(fechaHora) < new Date()) return setError('La fecha y hora no pueden ser anteriores a hoy.');
     if (!tipoCarga) return setError('Debes seleccionar un tipo de carga.');
+    if (precioCalculado === 0) return setError('El precio calculado es 0. Verifica los datos.');
 
     setCargando(true);
 
@@ -48,12 +90,12 @@ function PublicarCarga({ usuario, onVolver }) {
         esCompartida,
         descripcion,
         clienteId: usuario.id,
-        precioBase: parseFloat(precioBase)
+        precioBase: precioCalculado
       });
 
       if (response.data) {
         setMensaje(`¡Carga publicada! Precio final: $${response.data.precioFinal || response.data.precioBase}`);
-        setTimeout(() => onVolver(), 2000);
+        setTimeout(() => onConfirmarServicio(response.data), 1500);
       }
     } catch (error) {
       setError(error.response?.data || 'Error al publicar la carga. Intenta de nuevo.');
@@ -66,33 +108,42 @@ function PublicarCarga({ usuario, onVolver }) {
     <div className="container">
       <div className="form-card">
         <h2>Publicar Carga</h2>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="form-section">
             <h3>Datos de la Carga</h3>
             <div className="input-row">
               <div className="input-group">
                 <label>Origen *</label>
-                <input type="text" value={origen} onChange={(e) => setOrigen(e.target.value)} placeholder="Ciudad de origen" required />
+                <input type="text" value={origen} onChange={(e) => setOrigen(e.target.value)} placeholder="Ej: Bogota" required />
               </div>
               <div className="input-group">
                 <label>Destino *</label>
-                <input type="text" value={destino} onChange={(e) => setDestino(e.target.value)} placeholder="Ciudad de destino" required />
+                <input type="text" value={destino} onChange={(e) => setDestino(e.target.value)} placeholder="Ej: Medellin" required />
+              </div>
+            </div>
+
+            <div className="input-group">
+              <label>Distancia Estimada</label>
+              <div className="distancia-calculada">
+                {distancia > 0 ? `${distancia} km` : 'Esperando ruta...'}
               </div>
             </div>
 
             <div className="input-row">
               <div className="input-group">
                 <label>Fecha y Hora *</label>
-                <input type="datetime-local" value={fechaHora} onChange={(e) => setFechaHora(e.target.value)} required />
+                <input
+                  type="datetime-local"
+                  value={fechaHora}
+                  onChange={(e) => setFechaHora(e.target.value)}
+                  min={new Date().toISOString().slice(0, 16)}
+                  required
+                />
               </div>
               <div className="input-group">
                 <label>Tipo de Carga *</label>
-                <select 
-                  value={tipoCarga} 
-                  onChange={(e) => setTipoCarga(e.target.value)} 
-                  required
-                >
+                <select value={tipoCarga} onChange={(e) => setTipoCarga(e.target.value)} required>
                   <option value="">Selecciona...</option>
                   <option value="Perecederos">🍎 Perecederos (Alimentos)</option>
                   <option value="Electrodomesticos">🔌 Electrodomésticos</option>
@@ -121,14 +172,18 @@ function PublicarCarga({ usuario, onVolver }) {
             </div>
 
             <div className="input-group">
-              <label>Precio Base del Flete ($) *</label>
-              <input type="number" value={precioBase} onChange={(e) => setPrecioBase(e.target.value)} placeholder="Ej: 1000000" required />
+              <label>Precio Base Calculado</label>
+              <div className="precio-calculado">
+                {precioCalculado === 0 
+                  ? 'Ingresa peso, volumen y ruta' 
+                  : `$${precioCalculado.toLocaleString()} COP`}
+              </div>
             </div>
           </div>
 
           <div className="form-section">
             <h3>Condiciones del Envío</h3>
-            
+
             <div className="switch-group">
               <span>¿La carga es perecedera?</span>
               <label className="switch">
