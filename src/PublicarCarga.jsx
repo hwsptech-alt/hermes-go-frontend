@@ -5,6 +5,8 @@ import './App.css';
 function PublicarCarga({ usuario, onVolver, onConfirmarServicio }) {
   const [origen, setOrigen] = useState('');
   const [destino, setDestino] = useState('');
+  const [direccionOrigen, setDireccionOrigen] = useState('');
+  const [direccionDestino, setDireccionDestino] = useState('');
   const [fechaHora, setFechaHora] = useState('');
   const [tipoCarga, setTipoCarga] = useState('');
   const [peso, setPeso] = useState('');
@@ -14,21 +16,16 @@ function PublicarCarga({ usuario, onVolver, onConfirmarServicio }) {
   const [descripcion, setDescripcion] = useState('');
   
   const [distancia, setDistancia] = useState(0);
-
   const [mensaje, setMensaje] = useState('');
   const [error, setError] = useState('');
   const [cargando, setCargando] = useState(false);
 
-  // Este useEffect se ejecuta cada vez que cambia el origen o el destino
   useEffect(() => {
     if (!origen || !destino) {
       setDistancia(0);
       return;
     }
-
     const ruta = `${origen.toLowerCase().trim()}-${destino.toLowerCase().trim()}`;
-
-    // Simulador de distancias
     if (ruta.includes('bogota') && ruta.includes('medellin')) setDistancia(440);
     else if (ruta.includes('bogota') && ruta.includes('cali')) setDistancia(460);
     else if (ruta.includes('bogota') && ruta.includes('barranquilla')) setDistancia(1000);
@@ -36,24 +33,16 @@ function PublicarCarga({ usuario, onVolver, onConfirmarServicio }) {
     else if (ruta.includes('medellin') && ruta.includes('cali')) setDistancia(420);
     else if (ruta.includes('medellin') && ruta.includes('cartagena')) setDistancia(640);
     else if (ruta.includes('cali') && ruta.includes('pasto')) setDistancia(260);
-    else {
-      // Si no reconoce la ruta, calcula una distancia base
-      setDistancia(150); 
-    }
+    else setDistancia(150); 
   }, [origen, destino]);
 
-  // Función para calcular el precio automáticamente con tarifas realistas
   const calcularPrecioBase = () => {
     const pesoNum = parseFloat(peso) || 0;
     const volumenNum = parseFloat(volumen) || 0;
-
     if (pesoNum === 0 && volumenNum === 0) return 0;
-
-    // Tarifas ajustadas a la realidad colombiana
     const tarifaPorKm = 1500;    
     const tarifaPorKg = 200;     
     const tarifaPorVolumen = 5000; 
-
     return (distancia * tarifaPorKm) + (pesoNum * tarifaPorKg) + (volumenNum * tarifaPorVolumen);
   };
 
@@ -65,12 +54,12 @@ function PublicarCarga({ usuario, onVolver, onConfirmarServicio }) {
     setError('');
 
     if (!origen || !destino) return setError('Debes ingresar origen y destino.');
+    if (!direccionOrigen || !direccionDestino) return setError('Debes ingresar las direcciones exactas.');
     if (parseFloat(peso) <= 0) return setError('El peso debe ser mayor a 0.');
     if (parseFloat(volumen) <= 0) return setError('El volumen debe ser mayor a 0.');
     if (!fechaHora) return setError('Debes seleccionar una fecha y hora.');
     if (new Date(fechaHora) < new Date()) return setError('La fecha y hora no pueden ser anteriores a hoy.');
     if (!tipoCarga) return setError('Debes seleccionar un tipo de carga.');
-    if (precioCalculado === 0) return setError('El precio calculado es 0. Verifica los datos.');
 
     setCargando(true);
 
@@ -82,6 +71,8 @@ function PublicarCarga({ usuario, onVolver, onConfirmarServicio }) {
       const response = await axios.post(url, {
         origen,
         destino,
+        direccionOrigen,
+        direccionDestino,
         fechaHora,
         tipoCarga,
         peso: parseFloat(peso),
@@ -114,12 +105,23 @@ function PublicarCarga({ usuario, onVolver, onConfirmarServicio }) {
             <h3>Datos de la Carga</h3>
             <div className="input-row">
               <div className="input-group">
-                <label>Origen *</label>
+                <label>Ciudad Origen *</label>
                 <input type="text" value={origen} onChange={(e) => setOrigen(e.target.value)} placeholder="Ej: Bogota" required />
               </div>
               <div className="input-group">
-                <label>Destino *</label>
+                <label>Ciudad Destino *</label>
                 <input type="text" value={destino} onChange={(e) => setDestino(e.target.value)} placeholder="Ej: Medellin" required />
+              </div>
+            </div>
+
+            <div className="input-row">
+              <div className="input-group">
+                <label>Dirección de Recogida *</label>
+                <input type="text" value={direccionOrigen} onChange={(e) => setDireccionOrigen(e.target.value)} placeholder="Ej: Calle 100 #15-20" required />
+              </div>
+              <div className="input-group">
+                <label>Dirección de Entrega *</label>
+                <input type="text" value={direccionDestino} onChange={(e) => setDireccionDestino(e.target.value)} placeholder="Ej: Carrera 45 #10-05" required />
               </div>
             </div>
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
-function Historial({ usuario, onVolver, onIrAPagar }) {
+function Historial({ usuario, onVolver, onIrAPagar, onVerMapa }) {
   const [cargas, setCargas] = useState([]);
   const [cargando, setCargando] = useState(true);
 
@@ -25,7 +25,7 @@ function Historial({ usuario, onVolver, onIrAPagar }) {
       <div className="form-card">
         <h2>Historial de Servicios</h2>
 
-        {cargando && <p style={{ textAlign: 'center', marginTop: '20px' }}>Cargando historial...</p>}
+        {cargando && <p style={{ textAlign: 'center' }}>Cargando historial...</p>}
         
         {!cargando && cargas.length === 0 && (
           <p style={{ textAlign: 'center', color: '#666', marginTop: '20px' }}>No tienes envíos registrados aún.</p>
@@ -58,12 +58,21 @@ function Historial({ usuario, onVolver, onIrAPagar }) {
               {carga.estado === 'ACEPTADA' && !carga.pagado && (
                 <button 
                   className="btn-login" 
-                  style={{ padding: '8px', fontSize: '13px' }}
+                  style={{ padding: '8px', fontSize: '13px', marginBottom: '5px' }}
                   onClick={() => onIrAPagar(carga)}
                 >
                   💳 Pagar Ahora
                 </button>
               )}
+
+              {/* Botón para ver el mapa (siempre visible) */}
+              <button 
+                className="btn-volver" 
+                style={{ padding: '6px', fontSize: '12px' }}
+                onClick={() => onVerMapa(carga)}
+              >
+                📍 Ver Seguimiento
+              </button>
             </div>
           ))}
         </div>

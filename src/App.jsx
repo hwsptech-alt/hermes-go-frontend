@@ -10,7 +10,11 @@ import PublicarCarga from './PublicarCarga';
 import ConfirmarServicio from './ConfirmarServicio';
 import VerCargas from './VerCargas';
 import Pago from './Pago';
-import Historial from './Historial'; // <-- NUEVO IMPORT
+import Historial from './Historial';
+import MapaSeguimiento from './MapaSeguimiento';
+import ActaEntrega from './ActaEntrega';
+import MisViajes from './MisViajes';
+import LlegadaDestino from './LlegadaDestino'; // <-- NUEVO IMPORT
 
 function App() {
   const [correo, setCorreo] = useState('');
@@ -18,6 +22,8 @@ function App() {
   const [mensaje, setMensaje] = useState('');
   const [logueado, setLogueado] = useState(false);
   const [usuario, setUsuario] = useState(null);
+  
+  // Estados de Navegación
   const [mostrarRegistro, setMostrarRegistro] = useState(false);
   const [mostrarPerfil, setMostrarPerfil] = useState(false);
   const [mostrarPublicarCarga, setMostrarPublicarCarga] = useState(false);
@@ -26,12 +32,23 @@ function App() {
   const [cargaPublicada, setCargaPublicada] = useState(null);
   const [cargaSeleccionadaTransportador, setCargaSeleccionadaTransportador] = useState(null);
   
-  // Estados para el Pago
+  // Estados de Pago y Cliente
   const [mostrarPago, setMostrarPago] = useState(false);
   const [cargaParaPagar, setCargaParaPagar] = useState(null);
-
-  // NUEVO Estado para el Historial
   const [mostrarHistorial, setMostrarHistorial] = useState(false);
+  
+  // Estados de Seguimiento y Mapa
+  const [mostrarMapa, setMostrarMapa] = useState(false);
+  const [cargaParaMapa, setCargaParaMapa] = useState(null);
+  
+  // Estados de Transportador
+  const [mostrarMisViajes, setMostrarMisViajes] = useState(false);
+  const [mostrarActa, setMostrarActa] = useState(false);
+  const [cargaParaActa, setCargaParaActa] = useState(null);
+  
+  // NUEVOS Estados para la Llegada al Destino
+  const [mostrarLlegada, setMostrarLlegada] = useState(false);
+  const [cargaLlegada, setCargaLlegada] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -50,80 +67,105 @@ function App() {
     }
   };
 
-  // Pantalla de Pago
-  if (mostrarPago && cargaParaPagar) {
-    return <Pago 
-      carga={cargaParaPagar} 
-      usuario={usuario} 
-      onPagar={() => { 
-        setMostrarPago(false); 
-        setMostrarPublicarCarga(false); 
-        setCargaParaPagar(null); 
-        alert('¡Pago exitoso! Tu carga está en camino.');
+  // 1. Pantalla: Confirmar Llegada al Destino (Transportador)
+  if (mostrarLlegada && cargaLlegada) {
+    return <LlegadaDestino 
+      carga={cargaLlegada} 
+      onFinalizar={() => { 
+        setMostrarLlegada(false); 
+        setCargaLlegada(null); 
+        setMostrarMisViajes(true); // Vuelve a Mis Viajes
       }} 
-      onVolver={() => setMostrarPago(false)} 
+      onVolver={() => setMostrarLlegada(false)} 
     />;
   }
 
-  // NUEVA Pantalla de Historial (El cliente paga desde aquí)
-  if (mostrarHistorial) {
-    return <Historial 
-      usuario={usuario} 
-      onVolver={() => setMostrarHistorial(false)} 
-      onIrAPagar={(carga) => {
-        setCargaParaPagar(carga);
-        setMostrarHistorial(false);
-        setMostrarPago(true);
-      }} 
+  // 2. Pantalla: Acta de Entrega (Transportador)
+  if (mostrarActa && cargaParaActa) {
+    return <ActaEntrega 
+      carga={cargaParaActa} 
+      onFinalizar={() => { setMostrarActa(false); setCargaParaActa(null); }} 
+      onVolver={() => setMostrarActa(false)} 
     />;
   }
 
-  // Ver Cargas (Transportador)
-  if (mostrarVerCargas) {
-    return <VerCargas 
+  // 3. Pantalla: Mapa de Seguimiento (Ambos)
+  if (mostrarMapa && cargaParaMapa) {
+    return <MapaSeguimiento 
+      carga={cargaParaMapa} 
+      onVolver={() => setMostrarMapa(false)} 
+    />;
+  }
+
+  // 4. Pantalla: Mis Viajes (Transportador)
+  if (mostrarMisViajes) {
+    return <MisViajes 
       usuario={usuario} 
-      onVolver={() => setMostrarVerCargas(false)} 
-      onSeleccionarCarga={(carga) => {
-        setCargaSeleccionadaTransportador(carga);
-        setMostrarVerCargas(false);
-        setMostrarConfirmarServicio(true);
+      onVolver={() => setMostrarMisViajes(false)} 
+      onVerMapa={(carga) => { setCargaParaMapa(carga); setMostrarMapa(true); setMostrarMisViajes(false); }}
+      onLlegadaDestino={(carga) => {
+        setCargaLlegada(carga);
+        setMostrarLlegada(true);
+        setMostrarMisViajes(false);
       }}
     />;
   }
 
-  // Confirmar Servicio (Cliente y Transportador)
+  // 5. Pantalla: Historial (Cliente)
+  if (mostrarHistorial) {
+    return <Historial 
+      usuario={usuario} 
+      onVolver={() => setMostrarHistorial(false)} 
+      onIrAPagar={(carga) => { setCargaParaPagar(carga); setMostrarHistorial(false); setMostrarPago(true); }} 
+      onVerMapa={(carga) => { setCargaParaMapa(carga); setMostrarHistorial(false); setMostrarMapa(true); }}
+    />;
+  }
+
+  // 6. Pantalla: Pago (Cliente)
+  if (mostrarPago && cargaParaPagar) {
+    return <Pago 
+      carga={cargaParaPagar} 
+      usuario={usuario} 
+      onPagar={() => { setMostrarPago(false); setMostrarPublicarCarga(false); setCargaParaPagar(null); }} 
+      onVolver={() => setMostrarPago(false)} 
+    />;
+  }
+
+  // 7. Pantalla: Ver Cargas (Transportador)
+  if (mostrarVerCargas) {
+    return <VerCargas 
+      usuario={usuario} 
+      onVolver={() => setMostrarVerCargas(false)} 
+      onSeleccionarCarga={(carga) => { setCargaSeleccionadaTransportador(carga); setMostrarVerCargas(false); setMostrarConfirmarServicio(true); }} 
+    />;
+  }
+
+  // 8. Pantalla: Confirmar Servicio
   if (mostrarConfirmarServicio && (cargaPublicada || cargaSeleccionadaTransportador)) {
     const cargaAMostrar = cargaSeleccionadaTransportador || cargaPublicada;
-    const transportadorAMostrar = cargaSeleccionadaTransportador 
-      ? usuario 
-      : (cargaAMostrar.transportador || { nombreCompleto: 'Pendiente', tipoVehiculo: 'N/A', placa: 'N/A' });
+    const transportadorAMostrar = cargaSeleccionadaTransportador ? usuario : (cargaAMostrar.transportador || { nombreCompleto: 'Pendiente', tipoVehiculo: 'N/A', placa: 'N/A' });
 
     return <ConfirmarServicio 
       carga={cargaAMostrar} 
-      transportador={transportadorAMostrar}
+      transportador={transportadorAMostrar} 
       usuario={usuario}
       onConfirmar={() => { 
         setMostrarConfirmarServicio(false); 
         if (cargaSeleccionadaTransportador) {
-          // Si es transportador, solo cierra y avisa
           setCargaSeleccionadaTransportador(null);
           setMostrarPublicarCarga(false); 
           alert('¡Has aceptado la carga exitosamente!');
         } else {
-          // Si es cliente, se publica y vuelve al home (NO paga aún)
           setCargaPublicada(null);
           setMostrarPublicarCarga(false); 
           alert('¡Carga publicada! Un transportador la aceptará pronto. Podrás pagarla desde tu Historial.');
         }
       }} 
-      onVolver={() => {
-        setMostrarConfirmarServicio(false);
-        if (cargaSeleccionadaTransportador) setMostrarVerCargas(true);
-      }} 
+      onVolver={() => { setMostrarConfirmarServicio(false); if (cargaSeleccionadaTransportador) setMostrarVerCargas(true); }} 
     />;
   }
 
-  // Perfil
+  // 9. Pantalla: Perfil (Según Rol)
   if (mostrarPerfil) {
     if (usuario.rol === 'TRANSPORTADOR') {
       return <PerfilTransportador usuario={usuario} onCerrarSesion={() => { setMostrarPerfil(false); setLogueado(false); }} onVolver={() => setMostrarPerfil(false)} />;
@@ -132,44 +174,38 @@ function App() {
     }
   }
 
-  // Publicar Carga
+  // 10. Pantalla: Publicar Carga (Cliente)
   if (mostrarPublicarCarga) {
-    return <PublicarCarga
-      usuario={usuario}
-      onVolver={() => setMostrarPublicarCarga(false)}
-      onConfirmarServicio={(carga) => {
-        setCargaPublicada(carga);
-        setMostrarConfirmarServicio(true);
-      }}
-    />;
+    return <PublicarCarga usuario={usuario} onVolver={() => setMostrarPublicarCarga(false)} onConfirmarServicio={(carga) => { setCargaPublicada(carga); setMostrarConfirmarServicio(true); }} />;
   }
 
-  // Home
+  // 11. Pantalla: Home (Cliente o Transportador)
   if (logueado) {
     if (usuario.rol === 'TRANSPORTADOR') {
-      return <HomeTransportador
-        usuario={usuario}
-        onCerrarSesion={() => setLogueado(false)}
-        onVerPerfil={() => setMostrarPerfil(true)}
-        onVerCargas={() => setMostrarVerCargas(true)}
+      return <HomeTransportador 
+        usuario={usuario} 
+        onCerrarSesion={() => setLogueado(false)} 
+        onVerPerfil={() => setMostrarPerfil(true)} 
+        onVerCargas={() => setMostrarVerCargas(true)} 
+        onVerMisViajes={() => setMostrarMisViajes(true)} 
       />;
     } else {
-      return <Home
-        usuario={usuario}
-        onCerrarSesion={() => setLogueado(false)}
-        onVerPerfil={() => setMostrarPerfil(true)}
-        onPublicarCarga={() => setMostrarPublicarCarga(true)}
-        onVerHistorial={() => setMostrarHistorial(true)} // <-- NUEVA PROP
+      return <Home 
+        usuario={usuario} 
+        onCerrarSesion={() => setLogueado(false)} 
+        onVerPerfil={() => setMostrarPerfil(true)} 
+        onPublicarCarga={() => setMostrarPublicarCarga(true)} 
+        onVerHistorial={() => setMostrarHistorial(true)} 
       />;
     }
   }
 
-  // Registro
+  // 12. Pantalla: Registro
   if (mostrarRegistro) {
     return <Registro onVolverAlLogin={() => setMostrarRegistro(false)} />;
   }
 
-  // Login
+  // 13. Pantalla: Login
   return (
     <div className="container">
       <div className="login-card">
@@ -178,13 +214,11 @@ function App() {
           <h1>Hermes GO</h1>
           <p className="slogan">Logística inteligente<br/>en movimiento</p>
         </div>
-
         <div className="help-text">
           <div className="help-item"><span className="help-icon">📦</span><span>Publica tu carga</span></div>
           <div className="help-item"><span className="help-icon">🚚</span><span>Encuentra transportadores</span></div>
           <div className="help-item"><span className="help-icon">📍</span><span>Haz seguimiento en tiempo real</span></div>
         </div>
-
         <form onSubmit={handleSubmit}>
           <div className="input-group">
             <label>Correo Electrónico</label>
@@ -193,7 +227,6 @@ function App() {
               <input type="email" value={correo} onChange={(e) => setCorreo(e.target.value)} placeholder="correo@ejemplo.com" required />
             </div>
           </div>
-
           <div className="input-group">
             <label>Contraseña</label>
             <div className="input-with-icon">
@@ -201,18 +234,12 @@ function App() {
               <input type="password" value={contrasena} onChange={(e) => setContrasena(e.target.value)} placeholder="********" required />
             </div>
           </div>
-
-          <div className="forgot-password">
-            <a href="#">¿Olvidaste tu contraseña?</a>
-          </div>
-
+          <div className="forgot-password"><a href="#">¿Olvidaste tu contraseña?</a></div>
           <button type="submit" className="btn-login">Ingresar</button>
         </form>
-
         <div className="register-link">
           <p>¿No tienes cuenta? <a href="#" onClick={(e) => { e.preventDefault(); setMostrarRegistro(true); }}>Regístrate</a></p>
         </div>
-
         {mensaje && <p className="mensaje">{mensaje}</p>}
       </div>
     </div>
