@@ -13,18 +13,20 @@ function Home({ usuario, onCerrarSesion, onVerPerfil, onPublicarCarga, onVerHist
           <span className="menu-icon">📦</span>
           <span>Publicar Carga</span>
         </button>
-        <button className="menu-card">
-          <span className="menu-icon">🚚</span>
-          <span>Buscar Transporte</span>
-        </button>
-        <button className="menu-card">
+        
+        {/* ELIMINAMOS "Buscar Transporte" */}
+        
+        {/* Seguimiento ahora lleva al Historial de forma directa */}
+        <button className="menu-card" onClick={onVerHistorial}>
           <span className="menu-icon">📍</span>
           <span>Seguimiento</span>
         </button>
+
         <button className="menu-card" onClick={onVerHistorial}>
           <span className="menu-icon">📜</span>
           <span>Historial</span>
         </button>
+        
         <button className="menu-card" onClick={onVerPerfil}>
           <span className="menu-icon">👤</span>
           <span>Mi Perfil</span>

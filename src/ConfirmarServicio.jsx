@@ -9,8 +9,6 @@ function ConfirmarServicio({ carga, transportador, usuario, onConfirmar, onVolve
   const handleAceptar = async () => {
     setCargando(true);
     try {
-      // Si es el transportador, llama al backend para aceptar. 
-      // Si es el cliente, solo pasa directo al pago.
       if (usuario.rol === 'TRANSPORTADOR') {
         const response = await axios.put(
           `http://localhost:8080/api/cargas/${carga.id}/aceptar/${transportador.id}`
@@ -20,7 +18,6 @@ function ConfirmarServicio({ carga, transportador, usuario, onConfirmar, onVolve
           setTimeout(() => onConfirmar(response.data), 1500);
         }
       } else {
-        // Si es CLIENTE, saltamos directo al Pago sin llamar al backend
         onConfirmar(carga);
       }
     } catch (error) {

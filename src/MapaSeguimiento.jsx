@@ -51,13 +51,23 @@ function MapaSeguimiento({ carga, onVolver }) {
           <p style={{ fontSize: '11px', marginTop: '10px', color: '#FF8C00', fontWeight: 'bold' }}>{estadoTexto}</p>
         </div>
 
-        {/* CÓDIGO DE ENTREGA */}
-        <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#fff3e0', border: '2px dashed #FF8C00', borderRadius: '8px', textAlign: 'center' }}>
-          <h3 style={{ color: '#FF8C00', margin: 0 }}>Tu Código de Entrega</h3>
-          <p style={{ fontSize: '28px', fontWeight: 'bold', letterSpacing: '8px', margin: '10px 0', color: '#333' }}>
-            {carga?.codigoEntrega || '****'}
-          </p>
-          <p style={{ fontSize: '11px', color: '#666' }}>Dale este código al conductor cuando recibas tu mercancía.</p>
+        {/* CÓDIGOS DE RECOGIDA Y ENTREGA */}
+        <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+          <div style={{ flex: 1, padding: '10px', backgroundColor: '#fff3e0', border: '2px dashed #FF8C00', borderRadius: '8px', textAlign: 'center' }}>
+            <h3 style={{ color: '#FF8C00', margin: 0, fontSize: '14px' }}>Código Recogida</h3>
+            <p style={{ fontSize: '22px', fontWeight: 'bold', letterSpacing: '4px', margin: '5px 0', color: '#333' }}>
+              {carga?.codigoRecogida || '****'}
+            </p>
+            <p style={{ fontSize: '10px', color: '#666' }}>Dáselo al conductor al entregar la mercancía.</p>
+          </div>
+          
+          <div style={{ flex: 1, padding: '10px', backgroundColor: '#fff3e0', border: '2px dashed #FF8C00', borderRadius: '8px', textAlign: 'center' }}>
+            <h3 style={{ color: '#FF8C00', margin: 0, fontSize: '14px' }}>Código Entrega</h3>
+            <p style={{ fontSize: '22px', fontWeight: 'bold', letterSpacing: '4px', margin: '5px 0', color: '#333' }}>
+              {carga?.codigoEntrega || '****'}
+            </p>
+            <p style={{ fontSize: '10px', color: '#666' }}>Dáselo al conductor al recibir la mercancía.</p>
+          </div>
         </div>
 
         {/* INFORMACIÓN DEL SERVICIO */}
@@ -102,5 +112,3 @@ function MapaSeguimiento({ carga, onVolver }) {
     </div>
   );
 }
-
-export default MapaSeguimiento;
